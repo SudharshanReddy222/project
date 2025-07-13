@@ -10,8 +10,16 @@ pipeline {
             steps {
                 dir('project/src/ad') {
                     sh './gradlew clean build'
+                    sh 'chmod +x gradlew'
                 }
             }
         }
+        stage('Debug') {
+    steps {
+        sh 'ls -al'
+        sh 'ls -al src/ad'
+    }
+}
+
     }
 }

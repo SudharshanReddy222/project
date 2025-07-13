@@ -1,7 +1,7 @@
 pipeline {
     agent any
-    tools{
-        
+
+    tools {
         jdk 'openjdk_17'
     }
 
@@ -14,12 +14,11 @@ pipeline {
         }
         stage('Build microservice') {
             steps {
-                dir('project/src/ad') {
-                    sh './gradlew clean build'
-                    sh 'chmod +x gradlew'
+                dir('src/ad') {
+                    sh 'chmod +x gradlew'           
+                    sh './gradlew clean build'      
                 }
             }
         }
-
     }
 }

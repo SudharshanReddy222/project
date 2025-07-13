@@ -6,6 +6,12 @@ pipeline {
     }
 
     stages {
+        stage('Debug') {
+            steps {
+                sh 'ls -al'
+                sh 'ls -al src/ad'
+            }
+        }
         stage('Build microservice') {
             steps {
                 dir('project/src/ad') {
@@ -14,12 +20,6 @@ pipeline {
                 }
             }
         }
-        stage('Debug') {
-    steps {
-        sh 'ls -al'
-        sh 'ls -al src/ad'
-    }
-}
 
     }
 }

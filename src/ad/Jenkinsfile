@@ -28,7 +28,7 @@ pipeline {
             steps {
                 dir('src/ad') {
                     withSonarQubeEnv("${SONARQUBE_SERVER}") {
-                        sh './gradlew sonarqube-x verifyGoogleJavaFormat || true'
+                        sh './gradlew sonarqube -x verifyGoogleJavaFormat || true'
                     }
                 }
             }

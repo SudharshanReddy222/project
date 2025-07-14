@@ -1,15 +1,23 @@
 pipeline {
     agent any
 
+    environment {
+        AWS_DEFAULT_REGION = 'us-east-1'
+    }
+
     stages {
         stage('Check AWS Identity') {
             steps {
-                sh '''
-                    echo "Running as AWS user:"
-                    aws sts get-caller-identity
-                '''
+                withCredentials([[
+                    $class: 'AmazonWebServicesCredentialsBinding',
+                    credentialsId: 'ecr-credentials'
+                ]]) {
+                    sh '''
+                        echo "Running as AWS user:"
+                        aws sts get-caller-identity
+                    '''
+                }
             }
         }
     }
 }
-

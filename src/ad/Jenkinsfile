@@ -7,6 +7,10 @@ pipeline {
 
     environment {
         SONARQUBE_SERVER = 'my-sonar'
+        AWS-REGION = 'us-east-1'
+        ECR_REPOSITORY = 'ecr-repo'
+        ECR_ACCOUNT_ID = '027540914159'
+        IMAGE_TAG = 'latest'
     }
 
     stages {
@@ -43,6 +47,13 @@ pipeline {
 
 
                     }
+                }
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                dir('src/ad') {
+                    sh 'docker build -t ${ECR_REPOSITORY}:${IMAGE_TAG} .'
                 }
             }
         }

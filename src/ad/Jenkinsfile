@@ -70,5 +70,16 @@ pipeline {
                 }
             }
         }
+        stage('Deploy to Kubernetes') {
+            steps {
+                dir('src/ad') {
+                    sh '''
+                    echo "Deploying to Kubernetes"
+                    aws eks update-kubeconfig --region $region --name my-eks-cluster
+                    kubectl apply -f deploy.yaml
+                    '''
+                }
+            }
+        }
     }
 }

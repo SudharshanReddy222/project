@@ -1,1 +1,15 @@
-aws sts get-caller-identity
+pipeline {
+    agent any
+
+    stages {
+        stage('Check AWS Identity') {
+            steps {
+                sh '''
+                    echo "Running as AWS user:"
+                    aws sts get-caller-identity
+                '''
+            }
+        }
+    }
+}
+

@@ -12,13 +12,12 @@ pipeline {
                 sh 'ls -al src/ad'
             }
         }
+
         stage('Build ad microservice') {
             steps {
                 dir('src/ad') {
                     sh 'chmod +x gradlew'           
-                    sh './gradlew clean build' -x verifyGoogleJavaFormat
-                    
-                        
+                    sh './gradlew clean build -x verifyGoogleJavaFormat'   // ✅ FIXED: command is now one string
                 }
             }
         }

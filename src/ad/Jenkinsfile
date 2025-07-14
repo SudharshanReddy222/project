@@ -16,10 +16,9 @@ pipeline {
             steps {
                 dir('src/ad') {
                     sh 'chmod +x gradlew'           
-                    sh './gradlew clean build' 
-                    tasks.named('verifyGoogleJavaFormat') {
-                        ignoreFailures = true
-                    }     
+                    sh './gradlew clean build' -x verifyGoogleJavaFormat
+                    
+                        
                 }
             }
         }

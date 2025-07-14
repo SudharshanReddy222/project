@@ -28,7 +28,19 @@ pipeline {
             steps {
                 dir('src/ad') {
                     withSonarQubeEnv("${SONARQUBE_SERVER}") {
-                        sh './gradlew sonarqube -x verifyGoogleJavaFormat || true'
+                        sh './gradlew sonar -x verifyGoogleJavaFormat || true'
+                    }
+                }
+            }
+        }
+        stage('test the code with snyk') {
+            steps {
+                dir('src/ad') {
+                    withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_TOKEN')]) {
+                        sh 'snyk auth $SNYK_TOKEN'
+                        sh 'snyk test' || true
+
+
                     }
                 }
             }

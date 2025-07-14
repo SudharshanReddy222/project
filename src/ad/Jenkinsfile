@@ -18,14 +18,18 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh './gradlew clean build -x test'
+                dir('src/ad') {
+                    sh './gradlew clean build -x test'
+                }
             }
         }
 
         stage('SonarQube Analysis') {
             steps {
-                withSonarQubeEnv("${SONARQUBE_SERVER}") {
-                    sh './gradlew sonarqube'
+                dir('src/ad') {
+                    withSonarQubeEnv("${SONARQUBE_SERVER}") {
+                        sh './gradlew sonarqube'
+                    }
                 }
             }
         }

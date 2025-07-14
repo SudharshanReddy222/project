@@ -1,23 +1,14 @@
-pipeline {
-    agent any
-
-    environment {
-        AWS_DEFAULT_REGION = 'us-east-1'
-    }
-
-    stages {
-        stage('Check AWS Identity') {
-            steps {
-                withCredentials([[
-                    $class: 'AmazonWebServicesCredentialsBinding',
-                    credentialsId: 'ecr-credentials'
-                ]]) {
-                    sh '''
-                        echo "Running as AWS user:"
-                        aws sts get-caller-identity
-                    '''
-                }
-            }
+stage('Test EKS Access') {
+    steps {
+        withCredentials([[
+            $class: 'AmazonWebServicesCredentialsBinding',
+            credentialsId: 'ecr-credentials'
+        ]]) {
+            sh '''
+                aws eks update-kubeconfig --region us-east-1 --name my-eks-cluster
+                kubectl get nodes
+            '''
         }
     }
 }
+

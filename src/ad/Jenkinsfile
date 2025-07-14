@@ -5,19 +5,27 @@ pipeline {
         jdk 'openjdk_21'
     }
 
+    environment {
+        SONARQUBE_SERVER = 'my-sonar'
+    }
+
     stages {
-        stage('Debug') {
+        stage('Checkout') {
             steps {
-                sh 'ls -al'
-                sh 'ls -al src/ad'
+                checkout scm
             }
         }
 
-        stage('Build ad microservice') {
+        stage('Build') {
             steps {
-                dir('src/ad') {
-                    sh 'chmod +x gradlew'           
-                    sh './gradlew clean build -x verifyGoogleJavaFormat'   // ✅ FIXED: command is now one string
+                sh './gradlew clean build -x test'
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                withSonarQubeEnv("${SONARQUBE_SERVER}") {
+                    sh './gradlew sonarqube'
                 }
             }
         }

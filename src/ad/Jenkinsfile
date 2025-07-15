@@ -1,108 +1,23 @@
 pipeline {
     agent any
 
-    tools {
-        jdk 'openjdk_21'
-    }
-
     environment {
-        SONARQUBE_SERVER = 'my-sonar'
-        region = 'us-east-1'
-        ECR_REPOSITORY = 'ecr-repo'
-        ECR_ACCOUNT_ID = '027540914159'
-        IMAGE_TAG = 'latest'
-        registry = '027540914159.dkr.ecr.us-east-1.amazonaws.com'
-        awsCredentialId = 'ecr-credentials'
-        FULL_IMAGE_NAME = '027540914159.dkr.ecr.us-east-1.amazonaws.com/ecr-repo:latest'
         Frontend_URL = 'http://jayavardhanreddy616.xyz'
-        Report_Name = "zap-report.html"
+        Report_Name = 'zap-report.html'
     }
 
     stages {
-
-        stage('Checkout') {
-            steps {
-                checkout scm
-            }
-        }
-
-        stage('Build') {
-            steps {
-                dir('src/ad') {
-                    sh './gradlew clean build -x verifyGoogleJavaFormat'
-                }
-            }
-        }
-
-        stage('SonarQube Analysis') {
-            steps {
-                dir('src/ad') {
-                    withSonarQubeEnv("${SONARQUBE_SERVER}") {
-                        sh './gradlew sonar -x verifyGoogleJavaFormat || true'
-                    }
-                }
-            }
-        }
-
-        stage('Test the Code with Snyk') {
-            steps {
-                dir('src/ad') {
-                    withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_TOKEN')]) {
-                        sh 'snyk auth $SNYK_TOKEN'
-                        sh 'snyk test || true'
-                        sh 'snyk monitor || true'
-                    }
-                }
-            }
-        }
-
-        stage('Build Docker Image') {
-            steps {
-                dir('src/ad') {
-                    sh 'docker build -t $FULL_IMAGE_NAME .'
-                }
-            }
-        }
-
-        stage('Push to ECR') {
-            steps {
-                script {
-                    docker.withRegistry("https://${env.registry}", "ecr:${env.region}:${env.awsCredentialId}") {
-                        docker.image(env.FULL_IMAGE_NAME).push()
-                    }
-                }
-            }
-        }
-
-        stage('Deploy to Kubernetes') {
-            steps {
-                dir('src/ad') {
-                    withCredentials([[
-                        $class: 'AmazonWebServicesCredentialsBinding',
-                        credentialsId: 'ecr-credentials'
-                    ]]) {
-                        sh '''
-                            echo "Deploying to Kubernetes"
-                            export AWS_DEFAULT_REGION=$region
-                            aws eks update-kubeconfig --region $region --name my-eks-cluster
-                            kubectl apply -f deploy.yaml
-                            kubectl apply -f svc.yaml
-                        '''
-                    }
-                }
-            }
-        }
         stage('zap Scan') {
             steps {
-                script {
-                    sh '''
-                        echo "Running ZAP Scan"
-                        docker run -t owasp/zap2docker-stable zap-baseline.py -t $Frontend_URL -g gen.conf -r $Report_Name
-                        echo "ZAP Scan completed. Report saved as $Report_Name"
-                    '''
-                }
+                sh '''
+                    echo "Running ZAP Scan on $Frontend_URL"
+
+                    docker run --rm -v $(pwd):/zap/wrk/:rw -t ghcr.io/zaproxy/zap-baseline \
+                        -t $Frontend_URL -g gen.conf -r $Report_Name
+
+                    echo "ZAP Scan completed. Report saved as $Report_Name"
+                '''
             }
-        }   
+        }
     }
 }
-

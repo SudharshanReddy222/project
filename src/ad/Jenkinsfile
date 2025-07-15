@@ -1,30 +1,116 @@
 pipeline {
     agent any
 
+    tools {
+        jdk 'openjdk_21'
+    }
+
     environment {
-        TARGET_URL = 'http://jayavardhanreddy616.xyz'
-        REPORT_NAME = 'zap_report.html'
+        SONARQUBE_SERVER = 'my-sonar'
+        region = 'us-east-1'
+        ECR_REPOSITORY = 'ecr-repo'
+        ECR_ACCOUNT_ID = '027540914159'
+        IMAGE_TAG = 'latest'
+        registry = '027540914159.dkr.ecr.us-east-1.amazonaws.com'
+        awsCredentialId = 'ecr-credentials'
+        FULL_IMAGE_NAME = "${registry}/${ECR_REPOSITORY}:${IMAGE_TAG}"
+        Frontend_URL = 'http://jayavardhanreddy616.xyz'
+        Report_Name = 'zap-report.html'
         ZAP_IMAGE = 'ghcr.io/zaproxy/zaproxy:stable'
     }
 
     stages {
-        stage('Run ZAP Scan') {
+
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build') {
+            steps {
+                dir('src/ad') {
+                    sh './gradlew clean build -x verifyGoogleJavaFormat'
+                }
+            }
+        }
+
+        stage('SonarQube Analysis') {
+            steps {
+                dir('src/ad') {
+                    withSonarQubeEnv("${SONARQUBE_SERVER}") {
+                        sh './gradlew sonar -x verifyGoogleJavaFormat || true'
+                    }
+                }
+            }
+        }
+
+        stage('Test the Code with Snyk') {
+            steps {
+                dir('src/ad') {
+                    withCredentials([string(credentialsId: 'snyk-token', variable: 'SNYK_TOKEN')]) {
+                        sh 'snyk auth $SNYK_TOKEN'
+                        sh 'snyk test || true'
+                        sh 'snyk monitor || true'
+                    }
+                }
+            }
+        }
+
+        stage('Build Docker Image') {
+            steps {
+                dir('src/ad') {
+                    sh 'docker build -t $FULL_IMAGE_NAME .'
+                }
+            }
+        }
+
+        stage('Push to ECR') {
             steps {
                 script {
-                    sh '''
-                        echo "Sleeping 20 seconds to wait for app startup..."
+                    docker.withRegistry("https://${env.registry}", "ecr:${env.region}:${env.awsCredentialId}") {
+                        docker.image(env.FULL_IMAGE_NAME).push()
+                    }
+                }
+            }
+        }
+
+        stage('Deploy to Kubernetes') {
+            steps {
+                dir('src/ad') {
+                    withCredentials([[
+                        $class: 'AmazonWebServicesCredentialsBinding',
+                        credentialsId: 'ecr-credentials'
+                    ]]) {
+                        sh '''
+                            echo "Deploying to Kubernetes"
+                            export AWS_DEFAULT_REGION=$region
+                            aws eks update-kubeconfig --region $region --name my-eks-cluster
+                            kubectl apply -f deploy.yaml
+                            kubectl apply -f svc.yaml
+                        '''
+                    }
+                }
+            }
+        }
+
+        stage('ZAP Scan') {
+            steps {
+                script {
+                    sh """
+                        echo "Sleeping 20 seconds to wait for frontend startup..."
                         sleep 20
 
-                        echo "Running ZAP Baseline Scan on $TARGET_URL"
+                        echo "Running ZAP Baseline Scan on \$Frontend_URL"
 
-                        docker run --rm --user 0 -v $(pwd):/zap/wrk/:rw -t $ZAP_IMAGE zap-baseline.py \
-                            -t $TARGET_URL \
-                            -r $REPORT_NAME \
-                            -n \
+                        docker run --rm --user 0 -v \$(pwd):/zap/wrk/:rw -t \$ZAP_IMAGE zap-baseline.py \\
+                            -t \$Frontend_URL \\
+                            -r \$Report_Name \\
+                            -n \\
                             -I || true
 
-                        echo "ZAP Scan completed. Report saved as $REPORT_NAME"
-                    '''
+                        echo "ZAP Scan completed. Report saved as \$Report_Name"
+                    """
                 }
             }
         }
@@ -32,8 +118,8 @@ pipeline {
 
     post {
         always {
-            echo 'Archiving ZAP report...'
-            archiveArtifacts artifacts: "${REPORT_NAME}", allowEmptyArchive: true
+            echo 'Archiving ZAP scan report...'
+            archiveArtifacts artifacts: "${Report_Name}", allowEmptyArchive: true
         }
     }
 }

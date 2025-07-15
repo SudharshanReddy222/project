@@ -14,6 +14,8 @@ pipeline {
         registry = '027540914159.dkr.ecr.us-east-1.amazonaws.com'
         awsCredentialId = 'ecr-credentials'
         FULL_IMAGE_NAME = '027540914159.dkr.ecr.us-east-1.amazonaws.com/ecr-repo:latest'
+        Frontend_URL = 'http://jayavardhanreddy616.xyz'
+        Report_Name = "zap-report.html"
     }
 
     stages {
@@ -90,6 +92,17 @@ pipeline {
                 }
             }
         }
+        stage('zap Scan') {
+            steps {
+                dir('src/ad') {
+                    sh '''
+                        echo "Running ZAP Scan"
+                        docker run -t owasp/zap2docker-stable zap-baseline.py -t $Frontend_URL -g gen.conf -r $Report_Name
+                        echo "ZAP Scan completed. Report saved as $Report_Name"
+                    '''
+                }
+            }
+        }   
     }
 }
 

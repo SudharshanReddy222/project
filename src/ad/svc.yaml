@@ -16,6 +16,6 @@ spec:
   ports:
     - port: 8080
       name: tcp-service
-      targetPort: 8080
+      targetPort: 9099
   selector:
     opentelemetry.io/name: opentelemetry-demo-adservice

@@ -7,13 +7,13 @@ pipeline {
     }
 
     stages {
-        stage('zap Scan') {
+        stage('ZAP Scan') {
             steps {
                 sh '''
                     echo "Running ZAP Scan on $Frontend_URL"
 
-                    docker run --rm -v $(pwd):/zap/wrk/:rw -t ghcr.io/zaproxy/zap-baseline \
-                        -t $Frontend_URL -g gen.conf -r $Report_Name
+                    docker run --rm -v $(pwd):/zap/wrk/:rw securecodebox/zap:latest \
+                        zap-baseline.py -t $Frontend_URL -g gen.conf -r $Report_Name
 
                     echo "ZAP Scan completed. Report saved as $Report_Name"
                 '''

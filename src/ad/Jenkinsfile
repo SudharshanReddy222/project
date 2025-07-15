@@ -13,7 +13,7 @@ pipeline {
                     echo "Running ZAP Scan on $Frontend_URL"
 
                     docker run --rm -v $(pwd):/zap/wrk/:rw securecodebox/zap:latest \
-                        zap-baseline.py -t $Frontend_URL -g gen.conf -r $Report_Name
+                        zap.sh -cmd -autorun /zap/zap-baseline.py -t $Frontend_URL -r $Report_Name
 
                     echo "ZAP Scan completed. Report saved as $Report_Name"
                 '''

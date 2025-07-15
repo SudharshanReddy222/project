@@ -20,7 +20,8 @@ pipeline {
                         docker run --rm --user 0 -v $(pwd):/zap/wrk/:rw -t $ZAP_IMAGE zap-baseline.py \
                             -t $TARGET_URL \
                             -r $REPORT_NAME \
-                            -n -I || true
+                            -n \
+                            -I || true
 
                         echo "ZAP Scan completed. Report saved as $REPORT_NAME"
                     '''

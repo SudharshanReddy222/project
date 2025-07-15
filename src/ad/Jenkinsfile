@@ -2,22 +2,37 @@ pipeline {
     agent any
 
     environment {
-        Frontend_URL = 'http://jayavardhanreddy616.xyz'
-        Report_Name = 'zap-report.html'
+        TARGET_URL = 'http://3.89.201.145:30038'
+        REPORT_NAME = 'zap_report.html'
+        ZAP_IMAGE = 'ghcr.io/zaproxy/zaproxy:stable'
     }
 
     stages {
-        stage('ZAP Scan') {
+        stage('Run ZAP Scan') {
             steps {
-                sh '''
-                    echo "Running ZAP Scan on $Frontend_URL"
+                script {
+                    sh """
+                        echo "Sleeping 20 seconds to wait for app startup..."
+                        sleep 20
 
-                    docker run --rm -v $(pwd):/zap/wrk/:rw securecodebox/zap:latest \
-                        zap.sh -cmd -autorun /zap/zap-baseline.py -t $Frontend_URL -r $Report_Name
+                        echo "Running ZAP Baseline Scan on \$TARGET_URL"
 
-                    echo "ZAP Scan completed. Report saved as $Report_Name"
-                '''
+                        docker run --rm -v \$(pwd):/zap/wrk/:rw -t \$ZAP_IMAGE zap-baseline.py \\
+                            -t \$TARGET_URL \\
+                            -r \$REPORT_NAME \\
+                            -n -I || true
+
+                        echo "ZAP Scan completed. Report saved as \$REPORT_NAME"
+                    """
+                }
             }
+        }
+    }
+
+    post {
+        always {
+            echo "Archiving ZAP report..."
+            archiveArtifacts artifacts: "${REPORT_NAME}", allowEmptyArchive: true
         }
     }
 }

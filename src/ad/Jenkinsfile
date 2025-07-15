@@ -17,7 +17,7 @@ pipeline {
 
                         echo "Running ZAP Baseline Scan on $TARGET_URL"
 
-                        docker run --rm -v $(pwd):/zap/wrk/:rw -t $ZAP_IMAGE zap-baseline.py \
+                        docker run --rm --user 0 -v $(pwd):/zap/wrk/:rw -t $ZAP_IMAGE zap-baseline.py \
                             -t $TARGET_URL \
                             -r $REPORT_NAME \
                             -n -I || true

@@ -94,7 +94,7 @@ pipeline {
         }
         stage('zap Scan') {
             steps {
-                dir('src/ad') {
+                script {
                     sh '''
                         echo "Running ZAP Scan"
                         docker run -t owasp/zap2docker-stable zap-baseline.py -t $Frontend_URL -g gen.conf -r $Report_Name

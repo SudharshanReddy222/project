@@ -10,7 +10,7 @@ metadata:
     alb.ingress.kubernetes.io/backend-protocol: HTTP
     alb.ingress.kubernetes.io/ssl-redirect: '443'
     alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:027540914159:certificate/2451eda7-2b7d-4f02-976c-bfef1deb6d58 # your wildcard cert
-    external-dns.alpha.kubernetes.io/hostname: jayavardhanreddy616.xyz
+    external-dns.alpha.kubernetes.io/hostname: jayavardhanreddy616.xyz 
 spec:
   ingressClassName: alb
   rules:

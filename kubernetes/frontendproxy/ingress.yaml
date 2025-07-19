@@ -9,7 +9,6 @@ metadata:
     alb.ingress.kubernetes.io/listen-ports: '[{"HTTP": 80}, {"HTTPS": 443}]'
     alb.ingress.kubernetes.io/backend-protocol: HTTP
     alb.ingress.kubernetes.io/ssl-redirect: '443'
-    alb.ingress.kubernetes.io/certificate-arn: arn:aws:acm:us-east-1:027540914159:certificate/2451eda7-2b7d-4f02-976c-bfef1deb6d58,arn:aws:acm:us-east-1:027540914159:certificate/a2de6cd7-88ac-4803-a638-9ddfe3c49661
     external-dns.alpha.kubernetes.io/hostname: jayavardhanreddy616.xyz 
 spec:
   ingressClassName: alb

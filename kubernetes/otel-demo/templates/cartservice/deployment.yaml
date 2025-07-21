@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: cartservice
+spec:
+  replicas: {{ .Values.cartservice.replicaCount }}
+  selector:
+    matchLabels:
+      app: cartservice
+  template:
+    metadata:
+      labels:
+        app: cartservice
+    spec:
+      containers:
+        - name: cartservice
+          image: "{{ .Values.cartservice.image.repository }}:{{ .Values.cartservice.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.cartservice.port }}

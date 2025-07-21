@@ -1,0 +1,19 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontendproxy
+spec:
+  replicas: {{ .Values.frontendproxy.replicaCount }}
+  selector:
+    matchLabels:
+      app: frontendproxy
+  template:
+    metadata:
+      labels:
+        app: frontendproxy
+    spec:
+      containers:
+        - name: frontendproxy
+          image: "{{ .Values.frontendproxy.image.repository }}:{{ .Values.frontendproxy.image.tag }}"
+          ports:
+            - containerPort: {{ .Values.frontendproxy.port }}

@@ -13,3 +13,10 @@ frontend:
     tag: 1.12.0-frontend
   replicaCount: 2
   port: 8080
+  frontendproxy:
+    enabled: true
+    image:
+      repository: ghcr.io/open-telemetry/demo
+      tag: 1.12.0-frontend-proxy
+    replicaCount: 1
+    port: 8081

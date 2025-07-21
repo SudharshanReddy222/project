@@ -1,15 +1,15 @@
+# otel-demo/templates/service.yaml
+{{- range $service, $config := .Values }}
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "otel-demo.fullname" . }}
-  labels:
-    {{- include "otel-demo.labels" . | nindent 4 }}
+  name: {{ $service }}
 spec:
-  type: {{ .Values.service.type }}
-  ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
-      protocol: TCP
-      name: http
   selector:
-    {{- include "otel-demo.selectorLabels" . | nindent 4 }}
+    app: {{ $service }}
+  ports:
+    - protocol: TCP
+      port: {{ $config.port }}
+      targetPort: {{ $config.port }}
+---
+{{- end }}

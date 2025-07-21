@@ -4,6 +4,7 @@ cartservice:
     tag: 1.12.0-cartservice
   replicaCount: 2
   port: 7070
+  type: clusterip
 
 frontend:
   image:
@@ -11,6 +12,7 @@ frontend:
     tag: 1.12.0-frontend
   replicaCount: 2
   port: 8080
+  type: clusterip
 
 frontendproxy:
   enabled: true
@@ -19,3 +21,4 @@ frontendproxy:
     tag: 1.12.0-frontend-proxy
   replicaCount: 1
   port: 8081
+  type: clusterip

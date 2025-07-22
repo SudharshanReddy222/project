@@ -13,7 +13,7 @@ metadata:
     alb.ingress.kubernetes.io/healthcheck-path: /
     alb.ingress.kubernetes.io/load-balancer-attributes: idle_timeout.timeout_seconds=60
     kubernetes.io/ingress.class: alb
-    external-dns.alpha.kubernetes.io/hostname: frontend.jayavardhanreddy616.xyz
+    external-dns.alpha.kubernetes.io/hostname: jayavardhanreddy616.xyz
 spec:
   rules:
     - host: jayavardhanreddy.xyz  

@@ -16,7 +16,7 @@ metadata:
     external-dns.alpha.kubernetes.io/hostname: frontend.jayavardhanreddy616.xyz
 spec:
   rules:
-    - host: jayavardhanreddy    
+    - host: jayavardhanreddy.xyz  
       http:
         paths:
           - path: /
